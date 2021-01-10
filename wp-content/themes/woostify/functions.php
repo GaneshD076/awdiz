@@ -70,9 +70,10 @@ function myshortcode_posts( $att ) {
 	   return $return_string;
 }
 add_shortcode( 'myshortcode', 'myshortcode_posts' );
+//new order RestAPI Start
 add_action( 'woocommerce_new_order', 'create_invoice_for_wc_order',  1, 1  );
 function create_invoice_for_wc_order( $order_id ) {
-   include_once('api.php');
+   include_once('api.php');// gettind curl function page
 $order_data=array();
 $billingAddress=array();
 $shippingAddress=array();
@@ -94,7 +95,7 @@ $billing=$data['billing'];
 $shipping=$data['shipping'];
 
 $payment_method=$data['payment_method'];
-if($payment_method=="cod"){$order_data['isCOD']="1";}else{$order_data['isCOD']="0";}
+if($payment_method=="cod"){$order_data['isCOD']="1";}else{$order_data['isCOD']="0";}//to know paymentType is COD or not.
 $date_created=$data['date_created'];
 $order_data['orderDate']=get_the_date( 'Y-m-d H:i:s', $or->id);;
 $order_data['paymentType']=$payment_method;
@@ -124,7 +125,7 @@ $shippingAddress['postalCode']=$shipping['postcode'];
 $shippingAddress['countryName']=$shipping['country'];
 $order_data['shippingAddress']=$shippingAddress;
 $i=1;
-foreach ($order->get_items() as $item_key => $item ):
+foreach ($order->get_items() as $item_key => $item ):// to get item details 
    $product      = $item->get_product();
    $item_data    = $item->get_data();
 $items['lineItemSequenceNumber']=$i;
@@ -136,8 +137,8 @@ $items['customerPrice']=$product->get_price();
 $items['subtotal']=$item_data['subtotal'];
 $items['lineItemTotal']=$item_data['total'];
 $items['taxAmount']=$item_data['total_tax'];
-$image=wp_get_attachment_image_src(get_post_thumbnail_id($product->id),'single-post-thumbnail');
-$items['productUrl']=get_permalink( $product->id );
+$image=wp_get_attachment_image_src(get_post_thumbnail_id($product->id),'single-post-thumbnail');//product image link
+$items['productUrl']=get_permalink( $product->id );// product link
 $items['productImageUrl']=$image[0];
 $items['sku']=$product->get_sku();
 $order_data['items'][]=$items;
@@ -145,5 +146,6 @@ $i++;
 endforeach;
 }
 $endpoint="http://localhost/out/awdiz/api/";
-callAPI('POST', $endpoint, json_encode($order_data), $headers );
+callAPI('POST', $endpoint, json_encode($order_data), $headers );//calling curl function
 }
+//new order RestAPI End
